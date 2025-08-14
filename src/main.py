@@ -1,12 +1,9 @@
 import os
 import cv2
 import time
-import torch
 import numpy as np
 from PIL import Image
 from rembg import remove
-from realesrgan import RealESRGANer
-from basicsr.archs.rrdbnet_arch import RRDBNet
 # Input image
 
 def main():
@@ -22,17 +19,21 @@ def main():
    
     # Read image
     image = cv2.imread(image_path)
+    print(f"Image loaded: {image_path}")
 
     faces = detect_faces(image)
+    print(f"Faces detected: {len(faces)}")
 
     resized_crop, final_w, final_h = resize_image(faces, image)
+    print(f"Image resized to passport dimensions: {final_w}x{final_h}")
 
     white_background = white_bg(resized_crop, final_w, final_h)
+    print("Background removed and white background added.")
 
-    enhance_image = image_enhancement(np.array(white_background))
+    smooth_image = smoothing(white_background)
+    print("Image smoothed and cleaned.")
 
-    enhance_image.save(output_path)
-
+    smooth_image.save(output_path)
     print(f"Passport photo with clean white background saved: {output_path}")
 
 # Face detection
@@ -101,30 +102,8 @@ def white_bg(resized_crop, final_w, final_h):
     return white_bg
 
 
-def image_enhancement(image):
-    # Load Real-ESRGAN model
-    model_path = "src/RealESRGAN_x4plus.pth"
-
-    state_dict = torch.load(model_path, map_location=torch.device('cpu'))['params_ema']
-
-    model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
-    model.load_state_dict(state_dict, strict=True)
-
-    upsampler = RealESRGANer(
-        scale=4,
-        model_path=model_path,
-        model=model,
-        tile=0,
-        tile_pad=10,
-        pre_pad=0,
-        half=False,
-    )
-
-    image = np.array(image)
-
-    output, _ = upsampler.enhance(image, outscale=4)
-
-    return Image.fromarray(output)
+def smoothing(image: Image.Image) -> Image.Image:
+    pass
 
 
 if __name__ == "__main__":
