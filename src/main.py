@@ -2,14 +2,17 @@ import os
 import cv2
 import time
 import numpy as np
-from PIL import Image
+from io import BytesIO
 from rembg import remove
-# Input image
+from PIL import Image, ImageOps
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A6
+from reportlab.lib.utils import ImageReader
+
 
 def main():
 
-    image_path = r"assets\raw_photos\input-3.jpeg"
-    output_path = r"output.png"
+    image_path = r"assets\raw_photos\input-4.jpeg"
 
     # Validate file
     valid_extensions = ['.jpg', '.jpeg', '.png']
@@ -30,13 +33,18 @@ def main():
     white_background = white_bg(resized_crop, final_w, final_h)
     print("Background removed and white background added.")
 
-    smooth_image = smoothing(white_background)
-    print("Image smoothed and cleaned.")
+    bordered_image = add_outline(white_background)
+    print("Outline added to the image.")
 
-    smooth_image.save(output_path)
-    print(f"Passport photo with clean white background saved: {output_path}")
+    image_pdf = image_to_pdf(bordered_image)
+    print("Image converted to PDF.")
 
-# Face detection
+    with open("passport_pics.pdf", "wb") as f:
+        f.write(image_pdf.read())
+    print("Passport PDF with 9 photos saved: passport_pics.pdf")
+
+
+
 
 def detect_faces(image):
     if image is None:
@@ -102,8 +110,74 @@ def white_bg(resized_crop, final_w, final_h):
     return white_bg
 
 
-def smoothing(image: Image.Image) -> Image.Image:
-    pass
+def add_outline(image: Image.Image, color=(0, 0, 0), thickness=5) -> Image.Image:
+    #Add a thin outline (border) around the image.
+    outlined = ImageOps.expand(image, border=thickness, fill=color)
+    return outlined
+
+
+def image_to_pdf(image, rows=3, cols=3, gap_mm=2, margin_mm=2):
+    """
+    Create an A6 PDF with multiple copies of a passport photo.
+    - Keeps 3:4 ratio (no stretch)
+    - Adds spacing (gap) between photos
+    - Adds page margins
+    Returns a PDF in memory (BytesIO).
+    """
+
+    mm_to_pt = 2.8346
+    page_w, page_h = A6
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A6)
+
+    # Handle PIL.Image or path
+    if hasattr(image, "save"):
+        img_bytes = BytesIO()
+        image.save(img_bytes, format="PNG")
+        img_bytes.seek(0)
+        img_input = ImageReader(img_bytes)
+    else:
+        img_input = ImageReader(image)
+
+    # Convert values to points
+    gap = gap_mm * mm_to_pt
+    margin = margin_mm * mm_to_pt
+
+    # Available area inside margins
+    avail_w = page_w - 2 * margin - (cols - 1) * gap
+    avail_h = page_h - 2 * margin - (rows - 1) * gap
+
+    # Max cell size
+    cell_w = avail_w / cols
+    cell_h = avail_h / rows
+
+    # Passport ratio 3:4
+    ratio = 3 / 4
+    if cell_w / cell_h > ratio:
+        ph = cell_h
+        pw = ph * ratio
+    else:
+        pw = cell_w
+        ph = pw / ratio
+
+    # Total grid size
+    total_w = cols * pw + (cols - 1) * gap
+    total_h = rows * ph + (rows - 1) * gap
+
+    # Starting offsets (with margin + centering)
+    start_x = (page_w - total_w) / 2
+    start_y = (page_h - total_h) / 2
+
+    # Draw grid
+    for r in range(rows):
+        for c_idx in range(cols):
+            x = start_x + c_idx * (pw + gap)
+            y = page_h - start_y - (r + 1) * ph - r * gap
+            c.drawImage(img_input, x, y, pw, ph)
+
+    c.save()
+    buffer.seek(0)
+    return buffer
 
 
 if __name__ == "__main__":
