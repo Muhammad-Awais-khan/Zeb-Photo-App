@@ -12,7 +12,7 @@ from reportlab.lib.utils import ImageReader
 
 def main():
 
-    image_path = r"assets\raw_photos\input-4.jpeg"
+    image_path = r"assets\raw_photos\input-0.jpeg"
 
     # Validate file
     valid_extensions = ['.jpg', '.jpeg', '.png']
@@ -27,7 +27,10 @@ def main():
     faces = detect_faces(image)
     print(f"Faces detected: {len(faces)}")
 
-    resized_crop, final_w, final_h = resize_image(faces, image)
+    enhance_image = photo_enhancment(image)
+    print("Image enhanced with brightness, contrast, denoising, and sharpening.")
+
+    resized_crop, final_w, final_h = resize_image(faces, enhance_image)
     print(f"Image resized to passport dimensions: {final_w}x{final_h}")
 
     white_background = white_bg(resized_crop, final_w, final_h)
@@ -45,7 +48,6 @@ def main():
 
 
 
-
 def detect_faces(image):
     if image is None:
         raise ValueError("Image not found or could not be read.")
@@ -58,6 +60,11 @@ def detect_faces(image):
     return faces
 
 
+def photo_enhancment(img, brightness=15, contrast=1.1):
+    adjusted = cv2.convertScaleAbs(img, alpha=contrast, beta=brightness)
+    return adjusted
+
+
 def resize_image(faces, image):
     
     if len(faces) > 0:
@@ -66,8 +73,8 @@ def resize_image(faces, image):
 
         # Padding
         pad_x = int(w * 0.4)
-        pad_top = int(h * 0.5)
-        pad_bottom = int(h * 1.1)
+        pad_top = int(h * 0.7)
+        pad_bottom = int(h * 0.9)
 
         x1 = max(x - pad_x, 0)
         y1 = max(y - pad_top, 0)
