@@ -27,10 +27,10 @@ def main():
     faces = detect_faces(image)
     print(f"Faces detected: {len(faces)}")
 
-    enhance_image = photo_enhancment(image)
-    print("Image enhanced with brightness, contrast, denoising, and sharpening.")
+    adjust_image = photo_adjusment(image)
+    print("Image adjusted")
 
-    resized_crop, final_w, final_h = resize_image(faces, enhance_image)
+    resized_crop, final_w, final_h = resize_image(faces, adjust_image)
     print(f"Image resized to passport dimensions: {final_w}x{final_h}")
 
     white_background = white_bg(resized_crop, final_w, final_h)
@@ -60,7 +60,7 @@ def detect_faces(image):
     return faces
 
 
-def photo_enhancment(img, brightness=15, contrast=1.1):
+def photo_adjusment(img, brightness=15, contrast=1.1):
     adjusted = cv2.convertScaleAbs(img, alpha=contrast, beta=brightness)
     return adjusted
 
