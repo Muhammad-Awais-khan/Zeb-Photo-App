@@ -17,6 +17,7 @@ def main(
         use_adjust=False,
         brightness=1.0, 
         contrast=1.0,
+        one_picture=False
         ):
 
     # Validate file
@@ -45,13 +46,19 @@ def main(
     os.makedirs(folder, exist_ok=True)
 
     # Unique filename with timestamp
-    filename = f"passport_pics_{datetime.now().strftime('%Y %m %d_%H %M %S')}.pdf"
+    filename = f"passport_pics_{datetime.now().strftime('%Y %m %d_%H %M %S')}"
     
-    path = file_path(folder, filename)
 
+    if one_picture:
+        path = file_path(folder, filename, '.jpeg')
+        bordered_image.save(path, "JPEG", quality=100, optimize=True, progressive=True, dpi=(600, 600))
+    
+
+    else:
     # Save PDF
-    with open(path, "wb") as f:
-        f.write(image_pdf.read())
+        path = file_path(folder, filename, '.pdf')
+        with open(path, "wb") as f:
+            f.write(image_pdf.read())
 
     # Open automatically
     os.startfile(path)
@@ -223,8 +230,8 @@ def get_desktop_folder():
     return os.path.join(os.path.expanduser("~"), "Documents", "Passports_Pics_PDFs")
 
 
-def file_path(folder, filename):
-    return os.path.join(folder, filename)
+def file_path(folder, filename, extension):
+    return os.path.join(folder, filename + extension)
 
 if __name__ == "__main__":
     try:
