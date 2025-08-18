@@ -1,18 +1,23 @@
 import os
+import sys
 import cv2
 import time
 import numpy as np
 from io import BytesIO
 from rembg import remove
-from PIL import Image, ImageOps
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A6
 from reportlab.lib.utils import ImageReader
+from PIL import Image, ImageOps, ImageEnhance
 
 
-def main():
-
-    image_path = r"assets\raw_photos\input-0.jpeg"
+def main(
+        image_path, 
+        use_blue_bg=False, 
+        use_adjust=False,
+        brightness=1.0, 
+        contrast=1.0,
+        ):
 
     # Validate file
     valid_extensions = ['.jpg', '.jpeg', '.png']
@@ -27,16 +32,17 @@ def main():
     faces = detect_faces(image)
     print(f"Faces detected: {len(faces)}")
 
-    adjust_image = photo_adjusment(image)
+
+    adjust_image = photo_adjusment(image, use_adjust, brightness, contrast)
     print("Image adjusted")
 
     resized_crop, final_w, final_h = resize_image(faces, adjust_image)
     print(f"Image resized to passport dimensions: {final_w}x{final_h}")
 
-    white_background = white_bg(resized_crop, final_w, final_h)
-    print("Background removed and white background added.")
+    background_changed = bg(resized_crop, final_w, final_h, use_blue_bg)
+    print("Background removed")
 
-    bordered_image = add_outline(white_background)
+    bordered_image = add_outline(background_changed)
     print("Outline added to the image.")
 
     image_pdf = image_to_pdf(bordered_image)
@@ -60,8 +66,23 @@ def detect_faces(image):
     return faces
 
 
-def photo_adjusment(img, brightness=15, contrast=1.1):
-    adjusted = cv2.convertScaleAbs(img, alpha=contrast, beta=brightness)
+def photo_adjusment(img, use_adjust, brightness, contrast):
+    if not use_adjust:
+        return img
+
+    # Convert OpenCV (BGR) → PIL (RGB)
+    pil_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+
+    # Apply brightness
+    enhancer_b = ImageEnhance.Brightness(pil_img)
+    pil_img = enhancer_b.enhance(brightness)
+
+    # Apply contrast
+    enhancer_c = ImageEnhance.Contrast(pil_img)
+    pil_img = enhancer_c.enhance(contrast)
+
+    # Convert back to OpenCV (RGB → BGR)
+    adjusted = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
     return adjusted
 
 
@@ -106,15 +127,20 @@ def resize_image(faces, image):
         raise ValueError("No faces detected in the image.")
 
 
-def white_bg(resized_crop, final_w, final_h):
+def bg(resized_crop, final_w, final_h, use_blue_bg):
     # Remove background
     pil_image = Image.fromarray(cv2.cvtColor(resized_crop, cv2.COLOR_BGR2RGB))
     no_bg = remove(pil_image)  # Transparent background
 
-    # Add white background
-    white_bg = Image.new("RGB", (final_w, final_h), (255, 255, 255))
-    white_bg.paste(no_bg, mask=no_bg.split()[3])  # Use alpha channel as mask
-    return white_bg
+    if use_blue_bg:
+        blue_bg = Image.new("RGB", (final_w, final_h), (56, 182, 255))
+        blue_bg.paste(no_bg, mask=no_bg.split()[3])  # Use alpha channel as mask
+        return blue_bg
+    
+    else:
+        white_bg = Image.new("RGB", (final_w, final_h), (255, 255, 255))
+        white_bg.paste(no_bg, mask=no_bg.split()[3])  # Use alpha channel as mask
+        return white_bg
 
 
 def add_outline(image: Image.Image, color=(0, 0, 0), thickness=5) -> Image.Image:
@@ -190,7 +216,11 @@ def image_to_pdf(image, rows=3, cols=3, gap_mm=2, margin_mm=2):
 if __name__ == "__main__":
     time_start = time.time()
     try:
-        main()
+        if len(sys.argv) < 2:
+            raise ValueError("Please provide an image path as argument, e.g. python main.py input.jpg")
+        
+        image_path = sys.argv[1]
+        main(image_path)
         print(f"Execution time: {time.time() - time_start:.2f} seconds")
     except Exception as e:
         print(f"Error: {e}")
