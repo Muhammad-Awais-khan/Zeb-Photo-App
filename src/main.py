@@ -1,10 +1,10 @@
 import os
 import sys
 import cv2
-import time
 import numpy as np
 from io import BytesIO
 from rembg import remove
+from datetime import datetime
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A6
 from reportlab.lib.utils import ImageReader
@@ -27,32 +27,38 @@ def main(
    
     # Read image
     image = cv2.imread(image_path)
-    print(f"Image loaded: {image_path}")
 
     faces = detect_faces(image)
-    print(f"Faces detected: {len(faces)}")
-
 
     adjust_image = photo_adjusment(image, use_adjust, brightness, contrast)
-    print("Image adjusted")
 
     resized_crop, final_w, final_h = resize_image(faces, adjust_image)
-    print(f"Image resized to passport dimensions: {final_w}x{final_h}")
 
     background_changed = bg(resized_crop, final_w, final_h, use_blue_bg)
-    print("Background removed")
 
     bordered_image = add_outline(background_changed)
-    print("Outline added to the image.")
 
     image_pdf = image_to_pdf(bordered_image)
-    print("Image converted to PDF.")
 
-    with open("passport_pics.pdf", "wb") as f:
+    # Ensure output folder exists
+    folder = get_desktop_folder()
+    os.makedirs(folder, exist_ok=True)
+
+    # Unique filename with timestamp
+    filename = f"passport_pics_{datetime.now().strftime('%Y %m %d_%H %M %S')}.pdf"
+    
+    path = file_path(folder, filename)
+
+    # Save PDF
+    with open(path, "wb") as f:
         f.write(image_pdf.read())
-    print("Passport PDF with 9 photos saved: passport_pics.pdf")
 
+    # Open automatically
+    os.startfile(path)
+    
+    return path
 
+    
 
 def detect_faces(image):
     if image is None:
@@ -213,15 +219,20 @@ def image_to_pdf(image, rows=3, cols=3, gap_mm=2, margin_mm=2):
     return buffer
 
 
+def get_desktop_folder():
+    return os.path.join(os.path.expanduser("~"), "Documents", "Passports_Pics_PDFs")
+
+
+def file_path(folder, filename):
+    return os.path.join(folder, filename)
+
 if __name__ == "__main__":
-    time_start = time.time()
     try:
         if len(sys.argv) < 2:
             raise ValueError("Please provide an image path as argument, e.g. python main.py input.jpg")
         
         image_path = sys.argv[1]
         main(image_path)
-        print(f"Execution time: {time.time() - time_start:.2f} seconds")
     except Exception as e:
         print(f"Error: {e}")
         exit(1)

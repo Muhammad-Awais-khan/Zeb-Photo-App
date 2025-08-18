@@ -1,5 +1,7 @@
+import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk
 import main  # import your backend pipeline
 
 
@@ -24,14 +26,14 @@ def select_file():
             contrast = validate_float(contrast_var.get(), 0.1, 3.0, 1.0) if use_adjust_checked else 1.0
 
             # Call the main processing function from the backend script
-            main.main(
+            saved_path = main.main(
                 file_path,
                 use_blue_bg=use_blue_bg,
                 use_adjust=use_adjust_checked,
                 brightness=brightness,
                 contrast=contrast
             )
-            messagebox.showinfo("Success", "Passport PDF saved as passport_pics.pdf 🎉")
+            messagebox.showinfo("Success", f"Passport PDF saved to:\n{saved_path} ✅")
 
         except Exception as e:
             # Display any errors that occur during processing
@@ -70,7 +72,7 @@ def toggle_adjust():
     if adjust_var.get():
         # If checked, show the adjustment frame and guide label
         adjust_frame.pack(pady=5)
-        guide_label.pack(pady=5)
+        guide_label.pack(pady=10)
     else:
         # If unchecked, hide them
         adjust_frame.pack_forget()
@@ -80,21 +82,33 @@ def toggle_adjust():
 # --- Main Application Window Setup ---
 
 # Create the main window
+
 root = tk.Tk()
 root.title("Zeb Photo App 📸")
-root.geometry("600x500") # Set initial window size
-root.resizable(False, False) # Make window not resizable for simplicity
+root.geometry("600x500")
+root.resizable(False, False)  # fixed size
+
+base_path = os.path.dirname(__file__)
+bg_path = os.path.join(base_path, "bg.jpeg")
+
+# Load background
+bg_image = Image.open(bg_path).resize((600, 500))
+bg_photo = ImageTk.PhotoImage(bg_image)
+
+bg_label = tk.Label(root, image=bg_photo)
+bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
 
 # --- UI Elements ---
 
 # Checkbutton for Blue Background
 blue_bg_var = tk.BooleanVar() # Variable to store the state of the checkbox
-chk_blue_bg = tk.Checkbutton(root, text="Use Blue Background 🟦", variable=blue_bg_var, font=('Arial', 10))
+chk_blue_bg = tk.Checkbutton(root, text="Use Blue Background ", variable=blue_bg_var, font=('Arial', 10))
 chk_blue_bg.pack(pady=5)
 
 # Checkbutton to toggle Brightness/Contrast adjustments
 adjust_var = tk.BooleanVar() # Variable to store the state of the checkbox
-chk_adjust = tk.Checkbutton(root, text="Adjust Brightness/Contrast 💡", variable=adjust_var, command=toggle_adjust, font=('Arial', 10))
+chk_adjust = tk.Checkbutton(root, text="Adjust Brightness/Contrast ", variable=adjust_var, command=toggle_adjust, font=('Arial', 10))
 chk_adjust.pack(pady=5)
 
 # Frame to contain brightness/contrast input fields
@@ -121,13 +135,12 @@ guide_text = (
     "   - Less than 1.0 = decrease\n"
     " • Allowed range: 0.1 to 3.0"
 )
-guide_label = tk.Label(root, text=guide_text, justify="left", wraplength=450, fg="gray25", font=('Arial', 9))
-
+guide_label = tk.Label(root, text=guide_text, justify="left", wraplength=450, fg="gray25", font=('Arial', 10))
 
 # Select photo button
-btn_select_photo = tk.Button(root, text="Select Photo and Generate PDF 🖼️➡️📄", command=select_file,
-                           bg='#4CAF50', fg='white', font=('Arial', 12, 'bold'), relief=tk.RAISED, bd=3,
-                           activebackground='#45a049', activeforeground='white', padx=10, pady=5)
+btn_select_photo = tk.Button(root, text="Select Photo and Generate PDF", command=select_file,
+                           bg="#008CFF", fg='white', font=('Arial', 12, 'bold'), relief=tk.RAISED, bd=3,
+                           activebackground='#008CFF', activeforeground='white', padx=10, pady=5)
 btn_select_photo.pack(pady=20)
 
 # Initialize the state of adjustment frame and guide label
