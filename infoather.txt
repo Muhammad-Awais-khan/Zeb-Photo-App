@@ -1,0 +1,31 @@
+Zeb Passport Photo Maker
+========================
+
+Thank you for installing Zeb Passport Photo Maker!
+
+This application helps you quickly create professional passport-size photos.
+Features include:
+- Automatic cropping and alignment of faces
+- Background color selection (white / blue)
+- Photo enhancement and touch-up
+- Layout of 8 passport photos on A6 paper
+- Export to JPG and PDF
+- Direct print support
+
+Usage Instructions:
+1. Launch the application from the Start Menu or desktop shortcut.
+2. Select your photo and adjust the background color if required.
+3. Preview and save your passport photo sheet in JPG or PDF.
+4. Print directly from the app or using your preferred photo printer.
+
+Support:
+For questions, updates, or support, please contact:
+Email: owaiskhan6605@gmail.com
+Phone: +92-328-8690899
+
+License:
+This software is licensed to you for personal use only. 
+Commercial use, redistribution, or modification is prohibited 
+without prior written permission from the developer.
+
+Thank you for using Zeb Passport Photo Maker!

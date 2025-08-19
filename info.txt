@@ -1,0 +1,10 @@
+Welcome to Zeb Passport Photo Maker Setup!
+
+This software is created by Muhammad Awais (c) 2025.
+Please read the following information before continuing:
+
+- This software is for personal use only.
+- Commercial use requires written permission from the author.
+- By continuing, you agree to the terms of the included License Agreement.
+
+Click Next to continue with the installation.

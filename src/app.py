@@ -1,9 +1,15 @@
-import os
+import os, sys
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 import main  # import your backend pipeline
 
+
+def resource_path(filename):
+    """Get absolute path to resource, works for dev and for PyInstaller exe"""
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, filename)
+    return os.path.join(os.path.dirname(__file__), filename)
 
 def validate_float(value_str, min_val, max_val, default):
     """
@@ -80,9 +86,8 @@ root.title("Zeb Photo App 📸")
 root.geometry("600x500")
 root.resizable(False, False)
 
-base_path = os.path.dirname(__file__)
-bg_path = os.path.join(base_path, "bg.jpeg")
-icon_path = os.path.join(base_path, "icon.ico")
+bg_path = resource_path("bg.jpeg")
+icon_path = resource_path("icon.ico")
 
 # Load and set background image
 bg_image = Image.open(bg_path).resize((600, 500))
