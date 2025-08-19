@@ -71,9 +71,9 @@ def select_file():
                 use_adjust=use_adjust_checked,
                 brightness=brightness,
                 contrast=contrast,
-                one_picture=one_picture_var     
+                one_picture=one_picture    
             )
-            messagebox.showinfo("Success", f"Passport PDF saved to:\n{saved_path} ✅")
+            messagebox.showinfo("Success", f"File saved to:\n{saved_path} ✅")
 
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)} ❌")
