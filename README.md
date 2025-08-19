@@ -91,3 +91,6 @@ For support or inquiries:
 
 ---
 **Disclaimer:** This software is provided "as is" without warranty. See `license.txt` for details.
+
+---
+[Download Zeb Photo App](https://github.com/Muhammad-Awais-khan/Zeb-Photo-App/raw/main/Installer/Zebappsetup.exe)
