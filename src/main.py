@@ -168,7 +168,7 @@ def add_outline(image: Image.Image, color=(0, 0, 0), thickness=5) -> Image.Image
     return outlined
 
 
-def image_to_pdf(image, rows=3, cols=3, gap_mm=2, margin_mm=2):
+def image_to_pdf(image, rows=3, cols=3, gap_mm=2, margin_mm=3):
     """
     Create an A6 PDF with multiple copies of a passport photo.
     - Keeps 3:4 ratio (no stretch)
