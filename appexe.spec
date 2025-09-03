@@ -1,25 +1,25 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-# Collect all data/binaries for rembg and onnxruntime
+# Collect resources for rembg, onnxruntime, and reportlab
 rembg_datas, rembg_binaries, rembg_hiddenimports = collect_all('rembg')
 onnx_datas, onnx_binaries, onnx_hiddenimports = collect_all('onnxruntime')
+reportlab_datas, reportlab_binaries, reportlab_hiddenimports = collect_all('reportlab')
 
 a = Analysis(
     ['src\\app.py'],
     pathex=[],
-    binaries=rembg_binaries + onnx_binaries,
+    binaries=rembg_binaries + onnx_binaries + reportlab_binaries,
     datas=[
         ('src\\bg.jpeg', '.'),
         ('src\\haarcascade_frontalface_default.xml', '.'),
         ('src\\icon.ico', '.')
-    ] + rembg_datas + onnx_datas,
+    ] + rembg_datas + onnx_datas + reportlab_datas,
     hiddenimports=[
         'cv2',
         'numpy',
-        'reportlab',
-        'PIL'
-    ] + rembg_hiddenimports + onnx_hiddenimports,
+        'PIL',
+    ] + rembg_hiddenimports + onnx_hiddenimports + reportlab_hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
