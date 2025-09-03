@@ -37,17 +37,13 @@ exe = EXE(
     a.datas,
     [],
     name='ZebPhotoApp',
-    debug=False,
+    debug=True,                # enable PyInstaller debug mode
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,
+    console=True,              # keep console open for logs
     disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
     icon='src\\icon.ico',
 )
